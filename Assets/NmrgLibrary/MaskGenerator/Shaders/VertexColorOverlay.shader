@@ -4,7 +4,7 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         _OverlayColor ("Overlay Color", Color) = (1, 0.4, 0.4, 0.7)
-        _WireframeWidth ("Wireframe Width", Range(0.001, 0.1)) = 0.01
+        _WireframeWidth ("Wireframe Width", Range(0.001, 0.01)) = 0.002
     }
     
     SubShader
@@ -72,7 +72,7 @@
             {
                 // マスクされた三角形のみ処理
                 float mask = max(max(input[0].color.r, input[1].color.r), input[2].color.r);
-                if (mask < 0.5) return; // マスクされていない三角形はスキップ
+                if (mask < 0.5) return;
                 
                 g2f o;
                 
@@ -102,18 +102,15 @@
             
             fixed4 frag (g2f i) : SV_Target
             {
-                // スクリーン座標での偏微分を使用してワイヤーフレーム幅を画面で均一に
+                // スクリーン座標での偏微分を使用
                 float3 bary = i.barycentric;
                 float3 d = fwidth(bary);
                 
-                // 各エッジに近い部分を計算（重心座標が小さい部分）
-                float3 smoothedBary = smoothstep(float3(0, 0, 0), d * _WireframeWidth, bary);
+                // 各エッジからの距離
+                float3 edge = smoothstep(float3(0,0,0), d * _WireframeWidth, bary);
+                float minEdge = min(min(edge.x, edge.y), edge.z);
                 
-                // 最小値を取得（どれかのエッジに近ければワイヤーフレーム）
-                float minBary = min(min(smoothedBary.x, smoothedBary.y), smoothedBary.z);
-                
-                // ワイヤーフレーム表示（エッジに近い部分を1、遠い部分を0）
-                float wireframe = 1.0 - minBary;
+                float wireframe = 1.0 - minEdge;
                 
                 // マスク判定
                 float mask = i.color.r;
