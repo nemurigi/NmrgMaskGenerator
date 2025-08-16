@@ -45,7 +45,7 @@
             {
                 v2f o;
                 // UV座標を直接Clip Spaceにマッピング
-                o.vertex = float4(v.uv.x * 2.0 - 1.0, v.uv.y * 2.0 - 1.0, 0, 1);
+                o.vertex = float4(v.uv.x * 2.0 - 1.0, (1-v.uv.y) * 2.0 - 1.0, 0, 1);
                 o.uv = v.uv;
                 o.color = v.color;
                 return o;
